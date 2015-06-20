@@ -1,6 +1,7 @@
 package com.sixlhasa.bsegal.sunshine;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -112,6 +113,8 @@ public class ForecastFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String weather = mForecastAdapter.getItem(position);
                 Toast.makeText(getActivity(),weather,Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_TEXT,weather);
+                startActivity(intent);
             }
         });
         return rootView;
