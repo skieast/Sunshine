@@ -2,8 +2,10 @@ package com.sixlhasa.bsegal.sunshine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.os.Bundle;
@@ -48,7 +50,6 @@ import javax.net.ssl.HttpsURLConnection;
 public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> mForecastAdapter;
-    private List<String> weekForecast;
 
     public ForecastFragment() {
     }
@@ -64,6 +65,15 @@ public class ForecastFragment extends Fragment {
         inflator.inflate(R.menu.forecastfragment, menu);
     }
 
+
+    private void getWeather() {
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = prefs.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        weatherTask.execute(location);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -71,11 +81,16 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("Whistler");
+            getWeather();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getWeather();
     }
 
     @Override
@@ -83,16 +98,6 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
 
 
-        String[] forecastArray = {
-                "Today - Sunny - 90/80",
-                "Tomorrow  - Sunny - 85/63",
-                "Weds - Sunny - 85/63",
-                "Thurs  - Sunny - 81/63",
-                "Fri  - Sunny - 82/63",
-                "Sat  - Sunny - 84/63",
-                "Sun - Rain - 86/63",
-        };
-        weekForecast = new ArrayList<String>(Arrays.asList(forecastArray));
 
         mForecastAdapter = new ArrayAdapter<String>(
                 //current context, in this case parent activity
@@ -102,7 +107,7 @@ public class ForecastFragment extends Fragment {
                 //textview to populate
                 R.id.list_item_forecast_textview,
                 //forecast data can be teh String array or list . Adapter calls for each
-                weekForecast);
+                new ArrayList<String>());
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
