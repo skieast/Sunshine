@@ -2,8 +2,11 @@ package com.sixlhasa.bsegal.sunshine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.os.Bundle;
@@ -59,6 +62,20 @@ public class ForecastFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
+    private void updateWeather() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String weather = sharedPref.getString(
+                getString(R.string.pref_location_key ),getString(R.string.pref_location_default));
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        weatherTask.execute(weather);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflator) {
         inflator.inflate(R.menu.forecastfragment, menu);
@@ -71,8 +88,7 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("Whistler");
+            updateWeather();
             return true;
         }
         return super.onOptionsItemSelected(item);
